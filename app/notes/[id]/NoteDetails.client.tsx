@@ -6,8 +6,6 @@ import { useParams, useRouter } from "next/navigation";
 import Loading from "../../loading";
 import ErrorRoute from "./error";
 import NoteDetailsClientPage from "./NoteDetails";
-// Припустимо, що компонент Modal імпортується з вашої папки компонентів
-import Modal from "@/components/Modal"; 
 
 export default function NoteDetails() {
   const { id } = useParams<{ id: string }>();
@@ -23,7 +21,7 @@ export default function NoteDetails() {
     refetchOnMount: false,
   });
 
-  
+  // Обробник закриття модального вікна (повернення на попередню сторінку)
   const handleClose = () => {
     router.back();
   };
@@ -33,21 +31,31 @@ export default function NoteDetails() {
 
   return (
     note && (
-      <Modal onClose={handleClose}>
-        {}
-        <div className="flex justify-end p-2">
-          <button
-            onClick={handleClose}
-            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-sm font-medium transition-colors"
-            aria-label="Закрити модальне вікно"
-          >
-            Закрити
-          </button>
+      /* Бекдроп (затемнення фону) модального вікна */
+      <div 
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+        onClick={handleClose} // Закриття при кліку на фон
+      >
+        /* Контейнер модального вікна */
+        <div 
+          className="relative w-full max-w-2xl p-6 bg-white rounded-lg shadow-xl dark:bg-gray-900"
+          onClick={(e) => e.stopPropagation()} // Запобігаємо закриттю при кліку всередині вікна
+        >
+          {/* Видима кнопка закриття для користувача */}
+          <div className="flex justify-end mb-4">
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors dark:text-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700"
+              aria-label="Закрити модальне вікно"
+            >
+              Закрити
+            </button>
+          </div>
+          
+          {/* Контент самої нотатки */}
+          <NoteDetailsClientPage note={note} />
         </div>
-        
-        {}
-        <NoteDetailsClientPage note={note} />
-      </Modal>
+      </div>
     )
   );
 }
