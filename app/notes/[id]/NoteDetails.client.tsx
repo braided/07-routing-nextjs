@@ -8,11 +8,15 @@ import { fetchNoteById } from "@/lib/api";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 
-export default function NoteDetails() {
+export default function NotePreviewClient() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
-  const { data, isLoading, error } = useQuery({
+  const {
+    data: note,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["note", id],
     queryFn: () => fetchNoteById(id),
     refetchOnMount: false,
@@ -22,17 +26,25 @@ export default function NoteDetails() {
     router.back();
   };
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
+  if (error) {
+    return <ErrorRoute error={error} />;
+  }
+
+  if (!note) {
+    return null;
+  }
+
   return (
-    <>
-      {data && (
-        <Modal onClose={handleClose}>
-          <NoteDetailsClient note={data} />
-        </Modal>
-      )}
+    <Modal onClose={handleClose}>
+      <button type="button" onClick={handleClose}>
+        Close
+      </button>
 
-      {isLoading && <Loading />}
-
-      {error && <ErrorRoute error={error} />}
-    </>
+      <NoteDetailsClient note={note} />
+    </Modal>
   );
 }
